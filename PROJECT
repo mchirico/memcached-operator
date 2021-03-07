@@ -4,7 +4,7 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: memchached-operator
-repo: github.com/example/memcached-operator
+repo: github.com/mchirico/memcached-operator
 resources:
 - api:
     crdVersion: v1
@@ -13,6 +13,6 @@ resources:
   domain: example.com
   group: cache
   kind: Memcached
-  path: github.com/example/memcached-operator/api/v1alpha1
+  path: github.com/mchirico/memcached-operator/api/v1alpha1
   version: v1alpha1
 version: "3"
