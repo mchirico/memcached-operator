@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -8,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"time"
 
 	"context"
 
@@ -105,14 +107,32 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	podNames := getPodNames(podList.Items)
 
+	// Make sure size matches?
+	if int32(len(podNames)) != size {
+		memcached.Status.Msg = append(memcached.Status.Msg, fmt.Sprintf("Size Issue: %s", time.Now()))
+		err := r.Status().Update(ctx, memcached)
+		if err != nil {
+			log.Error(err, "Failed to update Memcached status Msg")
+			return ctrl.Result{}, err
+		}
+	}
+
 	// Update status.Nodes if needed
 	if !reflect.DeepEqual(podNames, memcached.Status.Nodes) {
 		memcached.Status.Nodes = podNames
+		// We only want last 8 in status
+		if len(memcached.Status.Msg) > 7 {
+			memcached.Status.Msg = append(memcached.Status.Msg[len(memcached.Status.Msg)-7:], fmt.Sprintf("Size Good: %s", time.Now()))
+		} else {
+			memcached.Status.Msg = append(memcached.Status.Msg, fmt.Sprintf("Size Good: %s", time.Now()))
+		}
+
 		err := r.Status().Update(ctx, memcached)
 		if err != nil {
-			log.Error(err, "Failed to update Memcached status")
+			log.Error(err, "Failed to update Memcached status on nodes")
 			return ctrl.Result{}, err
 		}
+		log.Error(err, "Status updated. WE'RE GOOD!")
 	}
 
 	return ctrl.Result{}, nil
