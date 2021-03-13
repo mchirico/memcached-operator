@@ -13,7 +13,6 @@ of ideas.
 See added tests: 
 
 
-
 ## Reference
 
 Reference the [azure-databricks-operator](https://github.com/microsoft/azure-databricks-operator) and all the
