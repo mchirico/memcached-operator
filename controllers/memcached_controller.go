@@ -105,26 +105,17 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Error(err, "Failed to list pods", "Memcached.Namespace", memcached.Namespace, "Memcached.Name", memcached.Name)
 		return ctrl.Result{}, err
 	}
+
 	podNames := getPodNames(podList.Items)
 
-	// Make sure size matches?
-	if int32(len(podNames)) != size {
-		memcached.Status.Msg = append(memcached.Status.Msg, fmt.Sprintf("Size Issue: %s", time.Now()))
-		err := r.Status().Update(ctx, memcached)
-		if err != nil {
-			log.Error(err, "Failed to update Memcached status Msg")
-			return ctrl.Result{}, err
-		}
-	}
-
 	// Update status.Nodes if needed
-	if !reflect.DeepEqual(podNames, memcached.Status.Nodes) {
+	if !reflect.DeepEqual(podNames, memcached.Status.Nodes) || int32(len(podNames)) != size {
 		memcached.Status.Nodes = podNames
 		// We only want last 8 in status
 		if len(memcached.Status.Msg) > 7 {
-			memcached.Status.Msg = append(memcached.Status.Msg[len(memcached.Status.Msg)-7:], fmt.Sprintf("Size Good: %s", time.Now()))
+			memcached.Status.Msg = append(memcached.Status.Msg[len(memcached.Status.Msg)-7:], statusMessageFromSize(len(podNames), size))
 		} else {
-			memcached.Status.Msg = append(memcached.Status.Msg, fmt.Sprintf("Size Good: %s", time.Now()))
+			memcached.Status.Msg = append(memcached.Status.Msg, statusMessageFromSize(len(podNames), size))
 		}
 
 		err := r.Status().Update(ctx, memcached)
@@ -133,6 +124,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{}, err
 		}
 		log.Error(err, "Status updated. WE'RE GOOD!")
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	return ctrl.Result{}, nil
@@ -174,6 +166,13 @@ func (r *MemcachedReconciler) deploymentForMemcached(m *cachev1alpha1.Memcached)
 	// Set Memcached instance as the owner and controller
 	ctrl.SetControllerReference(m, dep, r.Scheme)
 	return dep
+}
+
+func statusMessageFromSize(len int, size int32) string {
+	if int32(len) != size {
+		return fmt.Sprintf("Size Issue: (%d,%d)  %s", size, len, time.Now())
+	}
+	return fmt.Sprintf("Size Match: (%d,%d)  %s", size, len, time.Now())
 }
 
 // labelsForMemcached returns the labels for selecting the resources
