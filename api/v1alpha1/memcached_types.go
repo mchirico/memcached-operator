@@ -20,6 +20,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// FinalizerName is the finalizer
+	MemcachedFinalizerName = "memcached.operators.example.com/finalizer"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -57,6 +62,26 @@ type MemcachedList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Memcached `json:"items"`
+}
+
+// IsBeingDeleted returns true if a deletion timestamp is set
+func (in *Memcached) IsBeingDeleted() bool {
+	return !in.ObjectMeta.DeletionTimestamp.IsZero()
+}
+
+// HasFinalizer returns true if a deletion timestamp is set
+func (in *Memcached) HasFinalizer(finalizerName string) bool {
+	return containsString(in.ObjectMeta.Finalizers, finalizerName)
+}
+
+// AddFinalizer adds the specified finalizer
+func (in *Memcached) AddFinalizer(finalizerName string) {
+	in.ObjectMeta.Finalizers = append(in.ObjectMeta.Finalizers, finalizerName)
+}
+
+// RemoveFinalizer removes the specified finalizer
+func (in *Memcached) RemoveFinalizer(finalizerName string) {
+	in.ObjectMeta.Finalizers = removeString(in.ObjectMeta.Finalizers, finalizerName)
 }
 
 func init() {

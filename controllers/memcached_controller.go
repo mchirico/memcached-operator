@@ -67,6 +67,25 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	if memcached.IsBeingDeleted() {
+		r.Log.Info(fmt.Sprintf("HandleFinalizer for %v", req.NamespacedName))
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Start Delete Memcached", fmt.Sprintf("%s", req.NamespacedName))
+		if err := r.handleFinalizer(ctx, memcached); err != nil {
+			r.Recorder.Event(memcached, corev1.EventTypeWarning, "Error Delete Memcached", fmt.Sprintf("Error: %s", err.Error()))
+			return ctrl.Result{}, fmt.Errorf("error when handling finalizer: %w", err)
+		}
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Memcached Deleted", fmt.Sprintf("%s", req.NamespacedName))
+		return ctrl.Result{}, nil
+	}
+
+	if !memcached.HasFinalizer(cachev1alpha1.MemcachedFinalizerName) {
+		r.Log.Info(fmt.Sprintf("AddFinalizer for %v", req.NamespacedName))
+		if err := r.addFinalizer(ctx, memcached); err != nil {
+			return ctrl.Result{}, fmt.Errorf("error when adding finalizer: %w", err)
+		}
+		return ctrl.Result{}, nil
+	}
+
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{Name: memcached.Name, Namespace: memcached.Namespace}, found)
