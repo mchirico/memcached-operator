@@ -35,6 +35,7 @@ type MemcachedReconciler struct {
 // +kubebuilder:rbac:groups=cache.example.com,resources=memcacheds/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
+// +kubebuilder:rbac:groups=*,resources=events,verbs=*
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -88,12 +89,21 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Ensure the deployment size is the same as the spec
 	size := memcached.Spec.Size
 	if *found.Spec.Replicas != size {
+
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Start Update memcached.Spec.Size", fmt.Sprintf("New size: (%d), Old size: (%d)", size, found.Spec.Replicas))
+
 		found.Spec.Replicas = &size
+
 		err = r.Update(ctx, found)
 		if err != nil {
+			r.Recorder.Event(memcached, corev1.EventTypeWarning, "Failed to  Update memcached.Spec.Size", fmt.Sprintf("New size: (%d), Old size: (%d), Err: %s", size, found.Spec.Replicas, err.Error()))
+
 			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 			return ctrl.Result{}, err
 		}
+
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Updated memcached.Spec.Size", fmt.Sprintf("New size: (%d), Old size: (%d), Err: %s", size, found.Spec.Replicas, err.Error()))
+
 		// Spec updated - return and requeue
 		return ctrl.Result{Requeue: true}, nil
 	}
@@ -127,10 +137,14 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			log.Error(err, "Failed to update Memcached status on nodes")
 			return ctrl.Result{}, err
 		}
+
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Updated memcached.Status", fmt.Sprintf("Status: (%s)", statusMessageFromSize(len(podNames), size)))
+
 		log.Info("Status updated. WE'RE GOOD!")
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	r.Recorder.Event(memcached, corev1.EventTypeNormal, "memcached bottom loop", "All Good. Declarative Target Hit")
 	return ctrl.Result{}, nil
 }
 
