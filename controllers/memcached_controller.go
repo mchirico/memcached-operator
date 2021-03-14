@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"time"
@@ -24,8 +25,9 @@ import (
 // MemcachedReconciler reconciles a Memcached object
 type MemcachedReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=cache.example.com,resources=memcacheds,verbs=get;list;watch;create;update;patch;delete
@@ -55,10 +57,12 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			log.Info("Memcached resource not found. Ignoring since object must be deleted")
+			r.Recorder.Event(memcached, corev1.EventTypeNormal, "Memcached resource not found", "Ignoring since object must be deleted")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
 		log.Error(err, "Failed to get Memcached")
+		r.Recorder.Event(memcached, corev1.EventTypeWarning, "Failed to get Memcached", fmt.Sprintf("Error: %s", err.Error()))
 		return ctrl.Result{}, err
 	}
 
@@ -123,7 +127,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			log.Error(err, "Failed to update Memcached status on nodes")
 			return ctrl.Result{}, err
 		}
-		log.Error(err, "Status updated. WE'RE GOOD!")
+		log.Info("Status updated. WE'RE GOOD!")
 		return ctrl.Result{Requeue: true}, nil
 	}
 

@@ -79,9 +79,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&MemcachedReconciler{
-		k8sManager.GetClient(),
-		ctrl.Log.WithName("controllers").WithName("Memcached"),
-		nil,
+		Client:   k8sManager.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Memcached"),
+		Recorder: k8sManager.GetEventRecorderFor("environment-controller"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
