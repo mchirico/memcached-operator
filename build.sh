@@ -8,7 +8,7 @@ make manifests
 
 
 go fmt ./...
-docker build -t IMG=memcached-operator:v0.0.1 .
+docker build -t memcached-operator:v0.0.1 .
 
 # kind --name v118 load docker-image memcached-operator:v0.0.1
 kind --name v119 load docker-image memcached-operator:v0.0.1

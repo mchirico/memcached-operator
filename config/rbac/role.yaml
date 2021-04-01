@@ -13,19 +13,7 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cache.example.com
+  - '*'
   resources:
   - memcacheds
   verbs:
@@ -37,19 +25,31 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cache.example.com
+  - '*'
   resources:
   - memcacheds/finalizers
   verbs:
   - update
 - apiGroups:
-  - cache.example.com
+  - '*'
   resources:
   - memcacheds/status
   verbs:
   - get
   - patch
   - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - ""
   resources:
