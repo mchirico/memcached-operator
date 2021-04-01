@@ -6,8 +6,9 @@ unset GOPROXY
 make generate
 make manifests
 
+
 go fmt ./...
-make docker-build IMG=memcached-operator:v0.0.1
+docker build -t IMG=memcached-operator:v0.0.1 .
 
 # kind --name v118 load docker-image memcached-operator:v0.0.1
 kind --name v119 load docker-image memcached-operator:v0.0.1
