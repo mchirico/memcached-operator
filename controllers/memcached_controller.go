@@ -28,6 +28,7 @@ type MemcachedReconciler struct {
 	Log      logr.Logger
 	Recorder record.EventRecorder
 	Scheme   *runtime.Scheme
+	InTest   bool
 }
 
 // +kubebuilder:rbac:groups=*,resources=memcacheds,verbs=get;list;watch;create;update;patch;delete
@@ -205,8 +206,10 @@ func (r *MemcachedReconciler) deploymentForMemcached(m *cachev1alpha1.Memcached)
 		},
 	}
 	// Set Memcached instance as the owner and controller
-	if err := ctrl.SetControllerReference(m, dep, r.Scheme); err != nil {
-		return dep, err
+	if !r.InTest {
+		if err := ctrl.SetControllerReference(m, dep, r.Scheme); err != nil {
+			return dep, err
+		}
 	}
 	return dep, nil
 }
