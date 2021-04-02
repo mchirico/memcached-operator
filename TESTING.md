@@ -1,5 +1,7 @@
 
 ```bash
+k apply -f config/samples/cache_v1alpha1_memcached.yaml
+
 k get memcacheds
 k get memcacheds  memcached-sample -o yaml
 
