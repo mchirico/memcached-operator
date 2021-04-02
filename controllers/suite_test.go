@@ -17,7 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"os"
 	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"testing"
@@ -56,20 +55,31 @@ var _ = BeforeSuite(func(done Done) {
 
 	By("bootstrapping test environment")
 
-	t := true
-	if os.Getenv("TEST_WITH_EXISTING_CLUSTER") == "true" {
-		testEnv = &envtest.Environment{
-			UseExistingCluster:    &t,
-			CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
-			ErrorIfCRDPathMissing: true,
-		}
+	//t := true
+	//if os.Getenv("TEST_WITH_EXISTING_CLUSTER") == "true" {
+	//	testEnv = &envtest.Environment{
+	//		UseExistingCluster:    &t,
+	//		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+	//		ErrorIfCRDPathMissing: true,
+	//	}
+	//
+	//} else {
+	//	testEnv = &envtest.Environment{
+	//		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+	//		ErrorIfCRDPathMissing: true,
+	//	}
+	//}
 
-	} else {
-		testEnv = &envtest.Environment{
-			CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
-			ErrorIfCRDPathMissing: true,
-		}
+	t := true
+	testEnv = &envtest.Environment{
+		UseExistingCluster:    &t,
+		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+		ErrorIfCRDPathMissing: true,
+		// TODO (mmc): testing
+		//ControlPlaneStopTimeout: 3*time.Minute,
 	}
+
+	testEnv.CRDInstallOptions.CleanUpAfterUse = true
 
 	cfg, err := testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())

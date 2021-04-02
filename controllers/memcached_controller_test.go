@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/mchirico/memcached-operator/api/v1alpha1"
-	cachev1alpha1 "github.com/mchirico/memcached-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 )
@@ -24,7 +22,7 @@ var _ = Describe("Namespecial controller", func() {
 		namespace = "default"
 		name      = "memcached-sample"
 
-		timeout  = time.Second * 10000
+		timeout  = time.Second * 10
 		interval = time.Millisecond * 250
 	)
 
@@ -62,10 +60,10 @@ var _ = Describe("Namespecial controller", func() {
 			}, timeout, interval).Should(BeTrue())
 
 			// Note that your Memorycached’s GroupVersionKind is required to set up this owner reference.
-			kind := reflect.TypeOf(cachev1alpha1.Memcached{}).Name()
-			gvk := cachev1alpha1.GroupVersion.WithKind(kind)
-			controllerRef := metav1.NewControllerRef(cr, gvk)
-			cr.SetOwnerReferences([]metav1.OwnerReference{*controllerRef})
+			//kind := reflect.TypeOf(cachev1alpha1.Memcached{}).Name()
+			//gvk := cachev1alpha1.GroupVersion.WithKind(kind)
+			//controllerRef := metav1.NewControllerRef(cr, gvk)
+			//cr.SetOwnerReferences([]metav1.OwnerReference{*controllerRef})
 
 			//MergePatchType
 			//PatchType
@@ -88,18 +86,6 @@ var _ = Describe("Namespecial controller", func() {
 					return false
 				}
 				if len(cr.Status.Nodes) == 5 {
-					return true
-				}
-				return false
-			}, timeout, interval).Should(BeTrue())
-
-			patch = []byte(`{"spec":{"size": 15}}`)
-			Eventually(func() bool {
-				err := k8sClient.Patch(ctx, cr, client.RawPatch(types.MergePatchType, patch))
-				if err != nil {
-					return false
-				}
-				if len(cr.Status.Nodes) == 15 {
 					return true
 				}
 				return false
