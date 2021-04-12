@@ -20,6 +20,7 @@ jobs:
     - name: Install GoLangCI
       run: |
         go install github.com/golangci/golangci-lint/cmd/golangci-lint
+        echo "~/go/bin" >> $GITHUB_PATH
 
 
     - name: Install Kubebuilder Tools
@@ -29,7 +30,7 @@ jobs:
         # download kubebuilder and extract it to tmp
         curl -L https://go.kubebuilder.io/dl/2.3.1/${os}/${arch} | tar -xz -C /tmp/
         sudo mv /tmp/kubebuilder_2.3.1_${os}_${arch} /usr/local/kubebuilder
-        export PATH=$PATH:/usr/local/kubebuilder/bin
+        echo "/usr/local/kubebuilder/bin" >> $GITHUB_PATH
 
 
     - name: Build KinD Cluster
