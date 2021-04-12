@@ -1,0 +1,28 @@
+name: Sample Test Run with vscode
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+
+    - name: Run a multi-line script
+      run: |
+        echo Hello 
+
+        
+    # *** This goes after the problem. ****
+    - uses: mchirico/vscode-action@v1
+      with:
+        ngrok_token: ${{ secrets.NGROK_TOKEN }}
+        vscode_port: 8779
+        wait_duration: 1hr
