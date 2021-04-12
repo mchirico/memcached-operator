@@ -3,6 +3,7 @@ name: Sample Test Run with vscode
 on:
   push:
     branches: [ main ]
+
   pull_request:
     branches: [ main ]
 
