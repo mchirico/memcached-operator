@@ -13,11 +13,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      
+      with:
+        go-version: 1.16      
 
-    - name: Run a multi-line script
+    - name: Install GoLangCI
       run: |
-        echo Hello 
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint
+
+
+    - name: Install Kubebuilder Tools
+      run: |
+        os=$(go env GOOS)
+        arch=$(go env GOARCH)
+        # download kubebuilder and extract it to tmp
+        curl -L https://go.kubebuilder.io/dl/2.3.1/${os}/${arch} | tar -xz -C /tmp/
+        sudo mv /tmp/kubebuilder_2.3.1_${os}_${arch} /usr/local/kubebuilder
+        export PATH=$PATH:/usr/local/kubebuilder/bin
+	
 
         
     # *** This goes after the problem. ****
