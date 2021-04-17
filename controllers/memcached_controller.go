@@ -54,7 +54,10 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	memcached := &cachev1alpha1.Memcached{}
 	err := r.Get(ctx, req.NamespacedName, memcached)
 
-	r.notifier(ctx, memcached, "Starting PIG0")
+	if requeue, err := r.notifier(ctx, memcached, "Starting PIG 0"); requeue || err != nil {
+		return ctrl.Result{Requeue: requeue}, err
+	}
+
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -90,7 +93,9 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	r.notifier(ctx, memcached, "Starting PIG check deployment")
+	if requeue, err := r.notifier(ctx, memcached, "Starting PIG check deployment"); requeue || err != nil {
+		return ctrl.Result{Requeue: requeue}, err
+	}
 
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
@@ -114,6 +119,10 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	if requeue, err := r.notifier(ctx, memcached, "PIG Ensure the deployment size is the same as the spec"); requeue || err != nil {
+		return ctrl.Result{Requeue: requeue}, err
+	}
+
 	// Ensure the deployment size is the same as the spec
 	size := memcached.Spec.Size
 	if *found.Spec.Replicas != size {
@@ -134,6 +143,10 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		// Spec updated - return and requeue
 		return ctrl.Result{Requeue: true}, nil
+	}
+
+	if requeue, err := r.notifier(ctx, memcached, "PIG point 2"); requeue || err != nil {
+		return ctrl.Result{Requeue: requeue}, err
 	}
 
 	// Update the Memcached status with the pod names
@@ -170,6 +183,10 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		log.Info("Status updated. WE'RE GOOD!")
 		return ctrl.Result{Requeue: true}, nil
+	}
+
+	if requeue, err := r.notifier(ctx, memcached, "PIG all done"); requeue || err != nil {
+		return ctrl.Result{Requeue: requeue}, err
 	}
 
 	r.Recorder.Event(memcached, corev1.EventTypeNormal, "memcached bottom loop", "All Good. Declarative Target Hit")
