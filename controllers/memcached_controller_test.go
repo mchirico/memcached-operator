@@ -54,10 +54,7 @@ var _ = Describe("Namespecial controller", func() {
 			// We'll need to retry getting this, given that creation may not immediately happen.
 			Eventually(func() bool {
 				err := k8sClient.Create(ctx, cr)
-				if err != nil {
-					return false
-				}
-				return true
+				return err == nil
 			}, timeout, interval).Should(BeTrue())
 
 			// Note that your Memorycached’s GroupVersionKind is required to set up this owner reference.
@@ -94,10 +91,8 @@ var _ = Describe("Namespecial controller", func() {
 
 			Eventually(func() bool {
 				err := k8sClient.Delete(ctx, cr)
-				if err != nil {
-					return false
-				}
-				return true
+				return err == nil
+
 			}, timeout, interval).Should(BeTrue())
 
 		})

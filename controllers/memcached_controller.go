@@ -53,6 +53,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Fetch the Memcached instance
 	memcached := &cachev1alpha1.Memcached{}
 	err := r.Get(ctx, req.NamespacedName, memcached)
+
+	r.notifier(ctx, memcached, "Starting PIG0")
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -70,7 +72,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if memcached.IsBeingDeleted() {
 		r.Log.Info(fmt.Sprintf("HandleFinalizer for %v", req.NamespacedName))
-		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Start Delete Memcached", fmt.Sprintf("%s", req.NamespacedName))
+		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Start Delete Memcached", req.NamespacedName.String())
 		if err := r.handleFinalizer(ctx, memcached); err != nil {
 			r.Recorder.Event(memcached, corev1.EventTypeWarning, "Error Delete Memcached", fmt.Sprintf("Error: %s", err.Error()))
 			return ctrl.Result{}, fmt.Errorf("error when handling finalizer: %w", err)
@@ -87,6 +89,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		r.Recorder.Event(memcached, corev1.EventTypeNormal, "Added", "Object finalizer is added")
 		return ctrl.Result{}, nil
 	}
+
+	r.notifier(ctx, memcached, "Starting PIG check deployment")
 
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
