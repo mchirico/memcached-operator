@@ -44,11 +44,11 @@ jobs:
           EOF
 
 
-        
-    # *** This goes after the problem. ****
-    - uses: mchirico/vscode-action@v1
-      with:
-        ngrok_token: ${{ secrets.NGROK_TOKEN }}
-        vscode_port: 8779
-        wait_duration: 1hr
+
+    - name: Make test
+      env:
+          TEST_WITH_EXISTING_CLUSTER: true
+      run: |
+          make test
+
 
