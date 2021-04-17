@@ -23,7 +23,7 @@ var _ = Describe("Namespecial controller", func() {
 		name      = "memcached-sample"
 
 		// TODO mmc: set this back to 10 when done testing
-		timeout  = time.Second * 1000
+		timeout  = time.Second * 10
 		interval = time.Millisecond * 250
 	)
 
