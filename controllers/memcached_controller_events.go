@@ -21,7 +21,7 @@ func (r *MemcachedReconciler) notifier(ctx context.Context, memcached *cachev1al
 
 			if apiErr.Status().Reason == "AlreadyExists" {
 				key := types.NamespacedName{
-					Name:      memcached.Name,
+					Name:      tag,
 					Namespace: memcached.Namespace,
 				}
 				event := &corev1.Event{}
