@@ -2,10 +2,10 @@ name: Sample Test Run with vscode
 
 on:
   push:
-    branches: [ mainhold ]
+    branches: [ main ]
 
   pull_request:
-    branches: [ mainhold ]
+    branches: [ main ]
 
 jobs:
 
