@@ -54,7 +54,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	memcached := &cachev1alpha1.Memcached{}
 	err := r.Get(ctx, req.NamespacedName, memcached)
 
-	if requeue, err := r.notifier(ctx, memcached, "Starting PIG 0"); requeue || err != nil {
+	if requeue, err := r.notifier(ctx, memcached, "t0", "Starting PIG 0"); requeue || err != nil {
 		return ctrl.Result{Requeue: requeue}, err
 	}
 
@@ -93,7 +93,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	if requeue, err := r.notifier(ctx, memcached, "Starting PIG check deployment"); requeue || err != nil {
+	if requeue, err := r.notifier(ctx, memcached, "t1", "Starting PIG check deployment"); requeue || err != nil {
 		return ctrl.Result{Requeue: requeue}, err
 	}
 
@@ -119,7 +119,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	if requeue, err := r.notifier(ctx, memcached, "PIG Ensure the deployment size is the same as the spec"); requeue || err != nil {
+	if requeue, err := r.notifier(ctx, memcached, "t2", "PIG Ensure the deployment size is the same as the spec"); requeue || err != nil {
 		return ctrl.Result{Requeue: requeue}, err
 	}
 
@@ -145,7 +145,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	if requeue, err := r.notifier(ctx, memcached, "PIG point 2"); requeue || err != nil {
+	if requeue, err := r.notifier(ctx, memcached, "t3", "PIG point 2"); requeue || err != nil {
 		return ctrl.Result{Requeue: requeue}, err
 	}
 
@@ -185,7 +185,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	if requeue, err := r.notifier(ctx, memcached, "PIG all done"); requeue || err != nil {
+	if requeue, err := r.notifier(ctx, memcached, "done", "PIG all done"); requeue || err != nil {
 		return ctrl.Result{Requeue: requeue}, err
 	}
 
