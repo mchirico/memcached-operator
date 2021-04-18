@@ -8,14 +8,12 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"strings"
 	"time"
 )
 
 // Send notification if return true, requeue
-func (r *MemcachedReconciler) notifier(ctx context.Context, memcached *cachev1alpha1.Memcached, msg string) (bool, error) {
+func (r *MemcachedReconciler) notifier(ctx context.Context, memcached *cachev1alpha1.Memcached, tag string, msg string) (bool, error) {
 
-	tag := strings.ReplaceAll(memcached.Name+msg, " ", "_")
 	if err := r.Client.Create(ctx, makeEvent(memcached, msg, tag)); err != nil {
 		if apiErr, ok := err.(*errors.StatusError); ok {
 
