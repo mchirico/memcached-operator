@@ -103,7 +103,7 @@ var _ = AfterSuite(func() {
 })
 
 func UseExistingCluster() *bool {
-	use := true
+	use := false
 	if os.Getenv(constant.UseExistingCluster) == "true" {
 		use = true
 	}
